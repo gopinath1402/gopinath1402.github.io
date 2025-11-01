@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>My Content - Market Views & Analysis</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">FX Treasury Pro</div>
+                <ul class="nav-menu">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="content.html" class="active">My Content</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>Market Views & Content</h1>
+                <p>Daily market analysis, YouTube videos, and market resources</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="container">
+                <div class="content-tabs">
+                    <button class="tab-btn active" data-tab="daily">
+                        <span class="tab-icon">📊</span>
+                        <span class="tab-text">Daily Market</span>
+                    </button>
+                    <button class="tab-btn" data-tab="videos">
+                        <span class="tab-icon">🎥</span>
+                        <span class="tab-text">YouTube Videos</span>
+                    </button>
+                    <button class="tab-btn" data-tab="documents">
+                        <span class="tab-icon">📄</span>
+                        <span class="tab-text">Documents</span>
+                    </button>
+                    <button class="tab-btn" data-tab="articles">
+                        <span class="tab-icon">📝</span>
+                        <span class="tab-text">Articles</span>
+                    </button>
+                </div>
+
+                <!-- Daily Market Tab -->
+                <div class="tab-content active" id="daily">
+                    <div class="daily-market-header">
+                        <h2>The Daily Market — Numbers, Nerves & Narratives</h2>
+                        <p class="daily-subtitle">Less noise, more signal — and the occasional snark.</p>
+                        <p class="daily-intro">Here's where I break down the day's market moves — who rose, who fell, and what really drove it. Think of it as your evening debrief: FX Majors, The Dollar Index, USDINR, Nifty and Bank Nifty trends, sector scorecards, FPI/DII activity, and a quick technical pulse to frame tomorrow's setup.</p>
+                    </div>
+                    <div id="daily-market-container" class="daily-market-grid">
+                        <div class="loading">Loading market data...</div>
+                    </div>
+                    <div id="daily-update-container" class="daily-update" style="display: none;">
+                        <p class="update-time">Last updated: <span id="update-time-text">Loading...</span></p>
+                        <p class="update-note" id="update-note-text">Loading...</p>
+                    </div>
+                </div>
+
+                <!-- YouTube Videos Tab -->
+                <div class="tab-content" id="videos">
+                    <div class="video-header">
+                        <h2>Heard & Seen Around — Market Views in Motion</h2>
+                        <p class="video-subtitle">The world moves fast — but markets move faster.</p>
+                        <p class="video-intro">Short daily videos that distil the noise of global markets into insight and narrative. From currencies to commodities, central banks to start-ups — it's the day's pulse, decoded with clarity, context, and a hint of wit.</p>
+                    </div>
+                    <div id="videos-container" class="videos-container">
+                        <div class="loading">Loading videos...</div>
+                    </div>
+                </div>
+
+                <!-- Documents Tab -->
+                <div class="tab-content" id="documents">
+                    <h2>Documents & Reports</h2>
+                    <div id="documents-container" class="content-grid">
+                        <div class="loading">Loading documents...</div>
+                    </div>
+                </div>
+
+                <!-- Articles Tab -->
+                <div class="tab-content" id="articles">
+                    <h2>Articles & Blog Posts</h2>
+                    <div id="articles-container" class="content-list">
+                        <div class="loading">Loading articles...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 FX Treasury Pro. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="content.html">Content</a>
+                <a href="contact.html">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js?v=2.0"></script>
+</body>
+</html>
+
