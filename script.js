@@ -236,11 +236,48 @@ async function loadVideosFromFile() {
             // Use title or default to "Video X"
             const displayTitle = title || `Video ${validVideoCount + 1}`;
 
-            // Create video item with title
+            // Create video item with title from videos.txt file
             console.log('Creating video:', { videoId, title: displayTitle });
             const videoItem = createVideoItem(videoId, validVideoCount, displayTitle);
             
             videosContainer.appendChild(videoItem);
+            
+            // Debug: Verify title is in DOM after append
+            setTimeout(() => {
+                console.log('🔍 Checking DOM for video:', videoId);
+                console.log('Video item HTML:', videoItem.outerHTML.substring(0, 500));
+                
+                const titleEl = videoItem.querySelector('.video-title-display');
+                const containerEl = videoItem.querySelector('.video-title-container');
+                
+                console.log('Container found:', !!containerEl);
+                console.log('Title found:', !!titleEl);
+                
+                if (containerEl) {
+                    console.log('Container HTML:', containerEl.outerHTML);
+                } else {
+                    console.error('❌ Container element NOT found!');
+                }
+                
+                if (titleEl) {
+                    console.log('✅ Title element found:', {
+                        textContent: titleEl.textContent,
+                        innerHTML: titleEl.innerHTML,
+                        computedStyle: {
+                            display: window.getComputedStyle(titleEl).display,
+                            visibility: window.getComputedStyle(titleEl).visibility,
+                            opacity: window.getComputedStyle(titleEl).opacity,
+                            color: window.getComputedStyle(titleEl).color,
+                            height: window.getComputedStyle(titleEl).height,
+                            width: window.getComputedStyle(titleEl).width
+                        }
+                    });
+                } else {
+                    console.error('❌ Title element NOT found in DOM for video:', videoId);
+                    console.error('Full video item:', videoItem);
+                    console.error('Available elements:', Array.from(videoItem.querySelectorAll('*')).map(el => el.className || el.tagName));
+                }
+            }, 300);
             
             // Attach click events after item is in DOM
             setTimeout(() => {
@@ -552,16 +589,40 @@ function createVideoItem(videoId, index, title = `Video ${index + 1}`) {
                 </iframe>
             </div>
         </div>
-        <div style="padding: 1.5rem; background: white; border-top: 1px solid #e5e7eb;">
-            <h3 style="margin: 0 0 0.75rem 0; padding: 0; color: #1e293b; font-weight: 600; font-size: 1.1rem; line-height: 1.4; display: block;">${title || 'Video Title'}</h3>
-            <a href="https://www.youtube.com/watch?v=${videoId}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; color: var(--primary-color); text-decoration: none; transition: color 0.3s;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem;">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="currentColor"/>
-                </svg>
-                <span>Watch on YouTube</span>
-            </a>
+        <div class="video-title-container" style="padding: 1.5rem !important; background: #ffffff !important; border-top: 1px solid #e5e7eb !important; width: 100% !important; box-sizing: border-box !important; display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 100 !important; min-height: 80px !important;">
+            <h3 class="video-title-display" style="margin: 0 0 1rem 0 !important; padding: 0.5rem 0 !important; color: #1e293b !important; font-weight: 600 !important; font-size: 1.2rem !important; line-height: 1.6 !important; display: block !important; visibility: visible !important; opacity: 1 !important; background: #ffffff !important; word-wrap: break-word; overflow-wrap: break-word; max-width: 100% !important; width: 100% !important; box-sizing: border-box !important;">${title || 'Video Title'}</h3>
         </div>
     `;
+
+    // Debug: Verify innerHTML was set correctly
+    console.log('📝 Created video item for:', videoId, 'with title:', title);
+    
+    // Check if title container exists, if not, create it manually
+    let titleContainer = item.querySelector('.video-title-container');
+    
+    if (!titleContainer) {
+        console.warn('⚠️ Title container not found in innerHTML, creating manually...');
+        // Create title container manually
+        titleContainer = document.createElement('div');
+        titleContainer.className = 'video-title-container';
+        titleContainer.style.cssText = 'padding: 1.5rem !important; background: #ffffff !important; border-top: 1px solid #e5e7eb !important; width: 100% !important; box-sizing: border-box !important; display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 100 !important; min-height: 80px !important;';
+        
+        // Create title element
+        const titleEl = document.createElement('h3');
+        titleEl.className = 'video-title-display';
+        titleEl.textContent = title || 'Video Title';
+        titleEl.style.cssText = 'margin: 0 0 1rem 0 !important; padding: 0.5rem 0 !important; color: #1e293b !important; font-weight: 600 !important; font-size: 1.2rem !important; line-height: 1.6 !important; display: block !important; visibility: visible !important; opacity: 1 !important; background: #ffffff !important; word-wrap: break-word; overflow-wrap: break-word; max-width: 100% !important; width: 100% !important; box-sizing: border-box !important;';
+        
+        // Append to container
+        titleContainer.appendChild(titleEl);
+        // Note: YouTube link removed as requested
+        
+        // Append container to item
+        item.appendChild(titleContainer);
+        console.log('✅ Title container created and appended manually');
+    } else {
+        console.log('✅ Title container found in innerHTML');
+    }
 
     // Set initial cursor style (click events will be attached after DOM insertion)
     // Note: Click events are attached in loadVideosFromFile() after item is appended to DOM
