@@ -376,14 +376,16 @@ body::after {
 }
 
 .btn-primary {
-    background: var(--bg-white);
-    color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    border: 2px solid var(--primary-color);
 }
 
 .btn-primary:hover {
-    background: var(--bg-light);
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 4px 12px rgba(30, 78, 90, 0.4);
+    border-color: var(--secondary-color);
 }
 
 .btn-secondary {
