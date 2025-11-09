@@ -23,50 +23,146 @@ document.addEventListener('DOMContentLoaded', function() {
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
 
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const targetTab = this.getAttribute('data-tab');
+    console.log('Tab buttons found:', tabBtns.length);
+    console.log('Tab contents found:', tabContents.length);
 
-            // Remove active class from all buttons and contents
-            tabBtns.forEach(b => b.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
+    // Function to switch tabs
+    function switchTab(targetTab) {
+        console.log('Switching to tab:', targetTab);
+        
+        // Remove active class from all buttons and contents
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
 
-            // Add active class to clicked button and corresponding content
-            this.classList.add('active');
-            const targetElement = document.getElementById(targetTab);
-            if (targetElement) {
-                targetElement.classList.add('active');
-                
-                // If videos tab is clicked, ensure videos are loaded
-                if (targetTab === 'videos') {
-                    const videosContainer = document.getElementById('videos-container');
-                    if (videosContainer) {
-                        // Check if videos are already loaded or if container is empty
-                        const hasVideos = videosContainer.querySelectorAll('.video-item').length > 0;
-                        const hasError = videosContainer.querySelector('.error') !== null;
-                        const isLoading = videosContainer.querySelector('.loading') !== null;
-                        
-                        if ((!hasVideos && !hasError) || isLoading) {
-                            console.log('Videos tab opened - loading videos from videos.txt');
-                            loadVideosFromFile();
-                        }
+        // Find the button with matching data-tab
+        const targetBtn = Array.from(tabBtns).find(btn => btn.getAttribute('data-tab') === targetTab);
+        const targetElement = document.getElementById(targetTab);
+        
+        console.log('Target button found:', !!targetBtn);
+        console.log('Target element found:', !!targetElement);
+        
+        if (targetBtn && targetElement) {
+            targetBtn.classList.add('active');
+            targetElement.classList.add('active');
+            
+            // If macroeconomics tab is clicked, ensure videos are loaded
+            if (targetTab === 'macroeconomics') {
+                const videosContainer = document.getElementById('videos-container');
+                if (videosContainer) {
+                    // Check if videos are already loaded or if container is empty
+                    const hasVideos = videosContainer.querySelectorAll('.video-item').length > 0;
+                    const hasError = videosContainer.querySelector('.error') !== null;
+                    const isLoading = videosContainer.querySelector('.loading') !== null;
+                    
+                    if ((!hasVideos && !hasError) || isLoading) {
+                        console.log('Macroeconomics tab opened - loading videos from videos.txt');
+                        loadVideosFromFile();
                     }
                 }
             }
+            
+            // If current market tab is clicked, ensure market data is loaded
+            if (targetTab === 'current-market') {
+                const marketContainer = document.getElementById('daily-market-container');
+                if (marketContainer) {
+                    const hasData = marketContainer.querySelectorAll('.market-section').length > 0;
+                    const isLoading = marketContainer.querySelector('.loading') !== null;
+                    
+                    if (!hasData || isLoading) {
+                        console.log('Current Market Update tab opened - loading market data');
+                        loadLiveMarketData();
+                    }
+                }
+            }
+        } else {
+            console.error('Tab switch failed - target button or element not found');
+        }
+    }
+
+    // Handle tab button clicks
+    if (tabBtns.length > 0) {
+        tabBtns.forEach((btn, index) => {
+            const tabId = btn.getAttribute('data-tab');
+            console.log(`Attaching click listener to tab ${index}: ${tabId}`);
+            
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const targetTab = this.getAttribute('data-tab');
+                console.log('Tab button clicked:', targetTab);
+                switchTab(targetTab);
+            });
         });
+    } else {
+        console.warn('No tab buttons found on page');
+    }
+
+    // Handle hash navigation (from header links)
+    function handleHashNavigation() {
+        const hash = window.location.hash.substring(1); // Remove the #
+        if (hash === 'current-market' || hash === 'macroeconomics') {
+            // Small delay to ensure page is loaded
+            setTimeout(() => {
+                switchTab(hash);
+                // Scroll to top of content section
+                const contentSection = document.querySelector('.content-section');
+                if (contentSection) {
+                    contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        }
+    }
+
+    // Check hash on page load
+    if (window.location.pathname.includes('content.html')) {
+        handleHashNavigation();
+    }
+
+    // Update active navigation state based on current page
+    function updateActiveNav() {
+        const navLinks = document.querySelectorAll('.nav-menu a');
+        const currentPath = window.location.pathname;
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            const linkHref = link.getAttribute('href');
+            
+            // Check if it's the current page
+            if (linkHref.includes('index.html') && currentPath.includes('index.html')) {
+                link.classList.add('active');
+            } else if (linkHref.includes('contact.html') && currentPath.includes('contact.html')) {
+                link.classList.add('active');
+            } else if (linkHref.includes('content.html') && currentPath.includes('content.html')) {
+                link.classList.add('active');
+            } else if (linkHref.includes('macroeconomics.html') && currentPath.includes('macroeconomics.html')) {
+                link.classList.add('active');
+            }
+        });
+    }
+
+    // Update on page load
+    updateActiveNav();
+
+    // Update on hash change
+    window.addEventListener('hashchange', function() {
+        updateActiveNav();
+        if (window.location.pathname.includes('content.html')) {
+            handleHashNavigation();
+        }
     });
 
-    // Load YouTube Videos from videos.txt immediately
-    loadVideosFromFile();
+    // Load content based on current page
+    if (window.location.pathname.includes('content.html')) {
+        // Load Daily Market data - LIVE from APIs (for Current Market Update page)
+        loadLiveMarketData();
+    } else if (window.location.pathname.includes('macroeconomics.html')) {
+        // Load videos automatically on macroeconomics page
+        console.log('Macroeconomics page loaded - loading videos from videos.txt');
+        loadVideosFromFile();
+    }
     
-    // Load Documents from documents.txt
-    loadDocumentsFromFile();
-    
-    // Load Articles from articles.txt
-    loadArticlesFromFile();
-    
-    // Load Daily Market data - LIVE from APIs
-    loadLiveMarketData();
+    // Note: Videos will be loaded automatically on macroeconomics.html page
+    // Documents and Articles tabs have been removed - content is now in separate pages
 
     // Contact Form Handling
     const contactForm = document.getElementById('contactForm');

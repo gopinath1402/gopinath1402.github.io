@@ -416,6 +416,8 @@ body {
     gap: 0.75rem;
     position: relative;
     overflow: hidden;
+    pointer-events: auto;
+    z-index: 1;
 }
 
 .tab-btn::before {
@@ -436,6 +438,7 @@ body {
     position: relative;
     z-index: 1;
     transition: all 0.3s;
+    pointer-events: none;
 }
 
 .tab-icon {
