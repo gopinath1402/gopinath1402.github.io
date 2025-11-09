@@ -48,12 +48,22 @@
                     <p class="daily-subtitle">Daily updates on current markets</p>
                     <p class="daily-intro">Here's where I break down the day's market moves — who rose, who fell, and what really drove it. Think of it as your evening debrief: FX Majors, The Dollar Index, USDINR, Nifty and Bank Nifty trends, sector scorecards, FPI/DII activity, and a quick technical pulse to frame tomorrow's setup.</p>
                 </div>
-                <div id="daily-market-container" class="daily-market-grid">
-                    <div class="loading">Loading market data...</div>
+                
+                <!-- Daily Updates Section -->
+                <div id="daily-updates-container" class="daily-updates-section">
+                    <div class="loading">Loading daily updates...</div>
                 </div>
-                <div id="daily-update-container" class="daily-update" style="display: none;">
-                    <p class="update-time">Last updated: <span id="update-time-text">Loading...</span></p>
-                    <p class="update-note" id="update-note-text">Loading...</p>
+                
+                <!-- Live Market Data Section -->
+                <div class="market-data-section">
+                    <h3>Live Market Data</h3>
+                    <div id="daily-market-container" class="daily-market-grid">
+                        <div class="loading">Loading market data...</div>
+                    </div>
+                    <div id="daily-update-container" class="daily-update" style="display: none;">
+                        <p class="update-time">Last updated: <span id="update-time-text">Loading...</span></p>
+                        <p class="update-note" id="update-note-text">Loading...</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -70,7 +80,27 @@
         </div>
     </footer>
 
-    <script src="script.js?v=3.0"></script>
+    <script src="script.js?v=3.1"></script>
+    <script>
+        // Additional test to ensure function is called
+        window.addEventListener('load', function() {
+            console.log('=== Window load event fired ===');
+            if (window.location.pathname.includes('content.html') || window.location.href.includes('content.html')) {
+                console.log('=== Additional check: content.html page detected ===');
+                setTimeout(function() {
+                    console.log('=== Additional setTimeout: checking loadDailyUpdates ===');
+                    if (typeof loadDailyUpdates === 'function') {
+                        console.log('=== Calling loadDailyUpdates from window.load event ===');
+                        loadDailyUpdates().catch(function(err) {
+                            console.error('=== Error in loadDailyUpdates from window.load:', err);
+                        });
+                    } else {
+                        console.error('=== loadDailyUpdates is NOT a function in window.load ===');
+                    }
+                }, 500);
+            }
+        });
+    </script>
 </body>
 </html>
 

@@ -152,13 +152,49 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Load content based on current page
-    if (window.location.pathname.includes('content.html')) {
-        // Load Daily Market data - LIVE from APIs (for Current Market Update page)
-        loadLiveMarketData();
-    } else if (window.location.pathname.includes('macroeconomics.html')) {
+    console.log('=== PAGE LOAD CHECK ===');
+    console.log('Current page path:', window.location.pathname);
+    console.log('Current page href:', window.location.href);
+    console.log('Path includes content.html?', window.location.pathname.includes('content.html'));
+    console.log('Path includes macroeconomics.html?', window.location.pathname.includes('macroeconomics.html'));
+    
+    if (window.location.pathname.includes('content.html') || window.location.href.includes('content.html')) {
+        // Load Daily Updates and Market data (for Current Market Update page)
+        console.log('✓ Loading content for Current Market Update page');
+        console.log('✓ Calling loadDailyUpdates() and loadLiveMarketData()');
+        
+        // Check if function exists
+        if (typeof loadDailyUpdates === 'function') {
+            console.log('✓ loadDailyUpdates function exists');
+        } else {
+            console.error('✗ loadDailyUpdates function NOT FOUND!');
+        }
+        
+        // Small delay to ensure DOM is fully ready
+        setTimeout(() => {
+            console.log('✓ setTimeout callback executing - calling functions now');
+            console.log('✓ Checking if loadDailyUpdates exists:', typeof loadDailyUpdates);
+            console.log('✓ Checking if loadLiveMarketData exists:', typeof loadLiveMarketData);
+            
+            if (typeof loadDailyUpdates === 'function') {
+                console.log('✓ Calling loadDailyUpdates() now...');
+                loadDailyUpdates().catch(err => {
+                    console.error('✗ Error in loadDailyUpdates:', err);
+                });
+            } else {
+                console.error('✗ loadDailyUpdates is not a function! Type:', typeof loadDailyUpdates);
+            }
+            
+            if (typeof loadLiveMarketData === 'function') {
+                loadLiveMarketData();
+            }
+        }, 100);
+    } else if (window.location.pathname.includes('macroeconomics.html') || window.location.href.includes('macroeconomics.html')) {
         // Load videos automatically on macroeconomics page
         console.log('Macroeconomics page loaded - loading videos from videos.txt');
         loadVideosFromFile();
+    } else {
+        console.log('Page is neither content.html nor macroeconomics.html');
     }
     
     // Note: Videos will be loaded automatically on macroeconomics.html page
@@ -1162,7 +1198,142 @@ function createArticleItem(title, excerpt, link, index, dateString = '') {
     return article;
 }
 
-// Function to load LIVE market data from APIs
+// Load Daily Updates from daily-updates.txt
+// This function must be defined in global scope
+async function loadDailyUpdates() {
+    console.log('=== loadDailyUpdates function called ===');
+    const updatesContainer = document.getElementById('daily-updates-container');
+    if (!updatesContainer) {
+        console.error('✗ Daily updates container not found - element with id "daily-updates-container" does not exist');
+        return;
+    }
+
+    console.log('✓ Daily updates container found, loading from daily-updates.txt');
+
+    try {
+        // Check if we're using file:// protocol (local file access)
+        const isLocal = window.location.protocol === 'file:';
+        console.log('Protocol:', window.location.protocol, 'isLocal:', isLocal);
+        
+        if (isLocal) {
+            console.warn('Using file:// protocol - fetch may not work. Please use HTTP server (python -m http.server 8000)');
+            updatesContainer.innerHTML = `
+                <div class="error-message" style="background: #fff3cd; padding: 1rem; border-radius: 8px; border: 2px solid #ffc107;">
+                    <p style="color: #856404; font-weight: bold;">⚠️ Local File Access Detected</p>
+                    <p style="color: #856404; margin-top: 0.5rem;">Please use an HTTP server to load daily-updates.txt</p>
+                    <p style="color: #856404; font-size: 0.9rem; margin-top: 0.5rem;">Run: <code style="background: #fff; padding: 0.2rem 0.5rem; border-radius: 4px;">python -m http.server 8000</code></p>
+                    <p style="color: #856404; font-size: 0.9rem; margin-top: 0.5rem;">Then access: <code style="background: #fff; padding: 0.2rem 0.5rem; border-radius: 4px;">http://localhost:8000/content.html</code></p>
+                </div>
+            `;
+            return;
+        }
+        
+        const timestamp = new Date().getTime();
+        const fileUrl = `daily-updates.txt?t=${timestamp}`;
+        console.log('Fetching from:', fileUrl);
+        
+        const response = await fetch(fileUrl, {
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        });
+
+        console.log('Fetch response status:', response.status, response.statusText);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+        }
+
+        const text = await response.text();
+        console.log('Daily updates file loaded successfully, content length:', text.length);
+        console.log('Raw file content:', text.substring(0, 200));
+
+        // Parse the file - format: Date on first line, then content
+        const lines = text.trim().split('\n');
+        console.log('Total lines in file:', lines.length);
+        
+        if (lines.length === 0) {
+            throw new Error('File is empty');
+        }
+
+        const date = lines[0].trim();
+        const content = lines.slice(1).join('\n').trim();
+        
+        console.log('Parsed date:', date);
+        console.log('Content length:', content.length);
+        console.log('Content preview:', content.substring(0, 100));
+
+        if (!content) {
+            throw new Error('No content found in file');
+        }
+
+        // Format the date
+        let formattedDate = date;
+        try {
+            const updateDate = new Date(date);
+            if (!isNaN(updateDate.getTime())) {
+                formattedDate = updateDate.toLocaleDateString('en-IN', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+        } catch (e) {
+            console.warn('Date parsing failed, using original date:', e);
+        }
+
+        // Process content lines
+        const processedContent = content.split('\n').map(line => {
+            const trimmedLine = line.trim();
+            
+            if (trimmedLine === '') {
+                return '<br>';
+            } else if (trimmedLine.startsWith('- ')) {
+                return `<p class="update-bullet">${trimmedLine.substring(2)}</p>`;
+            } else if (trimmedLine.startsWith('• ')) {
+                return `<p class="update-bullet">${trimmedLine.substring(2)}</p>`;
+            } else if (trimmedLine.startsWith('-')) {
+                return `<p class="update-bullet">${trimmedLine.substring(1).trim()}</p>`;
+            } else if (trimmedLine.startsWith('•')) {
+                return `<p class="update-bullet">${trimmedLine.substring(1).trim()}</p>`;
+            } else if (trimmedLine.toLowerCase().includes('highlights') || trimmedLine.toLowerCase().includes('key')) {
+                return `<h4 class="update-subheading">${trimmedLine}</h4>`;
+            } else {
+                return `<p>${trimmedLine}</p>`;
+            }
+        }).join('');
+
+        // Create HTML for daily update
+        updatesContainer.innerHTML = `
+            <div class="daily-update-card">
+                <div class="update-header">
+                    <h3>Today's Market Update</h3>
+                    <span class="update-date">${formattedDate}</span>
+                </div>
+                <div class="update-content">
+                    ${processedContent}
+                </div>
+            </div>
+        `;
+
+        console.log('Daily updates displayed successfully');
+        console.log('Final HTML:', updatesContainer.innerHTML.substring(0, 200));
+
+    } catch (error) {
+        console.error('Error loading daily updates:', error);
+        console.error('Error stack:', error.stack);
+        updatesContainer.innerHTML = `
+            <div class="error-message" style="background: #fee; padding: 1rem; border-radius: 8px; border: 2px solid #f00;">
+                <p style="color: #c00; font-weight: bold;">Unable to load daily updates. Please check if daily-updates.txt file exists.</p>
+                <p class="error-detail" style="color: #900; margin-top: 0.5rem;">Error: ${error.message}</p>
+                <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">Make sure daily-updates.txt is in the same directory as content.html</p>
+            </div>
+        `;
+    }
+}
+
 async function loadLiveMarketData() {
     const marketContainer = document.getElementById('daily-market-container');
     const updateContainer = document.getElementById('daily-update-container');

@@ -1021,6 +1021,87 @@ body {
 }
 
 /* Daily Market Section */
+.daily-updates-section {
+    margin-bottom: 3rem;
+}
+
+.daily-update-card {
+    background: linear-gradient(135deg, var(--bg-white) 0%, #f8fafc 100%);
+    border: 2px solid var(--primary-color);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(30, 78, 90, 0.1);
+    margin-bottom: 2rem;
+}
+
+.update-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.update-header h3 {
+    color: var(--primary-color);
+    font-size: 1.75rem;
+    margin: 0;
+}
+
+.update-date {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.update-content {
+    color: var(--text-dark);
+    line-height: 1.8;
+    font-size: 1.05rem;
+}
+
+.update-content p {
+    margin-bottom: 1rem;
+}
+
+.update-bullet {
+    margin-left: 1.5rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+    padding-left: 0.5rem;
+}
+
+.update-bullet::before {
+    content: '•';
+    position: absolute;
+    left: -1.5rem;
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.update-subheading {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.market-data-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--border-color);
+}
+
+.market-data-section h3 {
+    color: var(--text-dark);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
 .daily-market-header {
     text-align: center;
     margin-bottom: 3rem;
