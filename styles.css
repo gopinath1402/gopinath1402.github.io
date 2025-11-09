@@ -23,12 +23,117 @@ body {
     line-height: 1.6;
     color: var(--text-dark);
     background-color: var(--bg-white);
+    position: relative;
+    overflow-x: hidden;
+    background-image: 
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 100px,
+            rgba(30, 78, 90, 0.01) 100px,
+            rgba(30, 78, 90, 0.01) 101px
+        ),
+        url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,50 L20,45 L40,55 L60,40 L80,60 L100,50' stroke='%231e4e5a' stroke-width='0.5' fill='none' opacity='0.02'/%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,40 L15,35 L30,45 L45,30 L60,50 L80,40' stroke='%232d7a8a' stroke-width='0.5' fill='none' opacity='0.015'/%3E%3C/svg%3E");
+    background-size: auto, 200px 200px, 150px 150px;
+    background-position: 0 0, 0 0, 50px 50px;
+    background-repeat: repeat, repeat, repeat;
 }
+
+/* Background Decorative Elements */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 15% 20%, rgba(30, 78, 90, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 85% 80%, rgba(45, 122, 138, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(58, 154, 176, 0.02) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+body::after {
+    content: '📈 📊 💹 💰 📉';
+    position: fixed;
+    top: 10%;
+    right: 5%;
+    font-size: 4rem;
+    opacity: 0.05;
+    transform: rotate(15deg);
+    pointer-events: none;
+    z-index: 0;
+    white-space: nowrap;
+}
+
+/* Decorative Forex Symbols */
+.decorative-symbols {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.decorative-symbols::before {
+    content: '$';
+    position: absolute;
+    top: 15%;
+    left: 8%;
+    font-size: 8rem;
+    font-weight: 300;
+    color: rgba(30, 78, 90, 0.04);
+    transform: rotate(-20deg);
+    font-family: 'Arial', sans-serif;
+}
+
+.decorative-symbols::after {
+    content: '£€¥₹';
+    position: absolute;
+    bottom: 20%;
+    right: 10%;
+    font-size: 6rem;
+    font-weight: 300;
+    color: rgba(30, 78, 90, 0.04);
+    transform: rotate(25deg);
+    font-family: 'Arial', sans-serif;
+    letter-spacing: 1rem;
+}
+
+/* Additional Forex Symbols */
+.decorative-symbols .symbol-1 {
+    position: absolute;
+    top: 30%;
+    right: 15%;
+    font-size: 5rem;
+    color: rgba(30, 78, 90, 0.03);
+    transform: rotate(10deg);
+    content: '€';
+}
+
+.decorative-symbols .symbol-2 {
+    position: absolute;
+    bottom: 30%;
+    left: 12%;
+    font-size: 5rem;
+    color: rgba(30, 78, 90, 0.03);
+    transform: rotate(-10deg);
+    content: '£';
+}
+
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
+    position: relative;
+    z-index: 2;
 }
 
 /* Navigation */
@@ -206,6 +311,37 @@ body {
     color: white;
     padding: 100px 20px;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '📈 📊 💹';
+    position: absolute;
+    top: 10%;
+    left: 5%;
+    font-size: 5rem;
+    opacity: 0.1;
+    transform: rotate(-15deg);
+    pointer-events: none;
+}
+
+.hero::after {
+    content: '$ £ € ¥ ₹';
+    position: absolute;
+    bottom: 10%;
+    right: 5%;
+    font-size: 4rem;
+    opacity: 0.1;
+    transform: rotate(15deg);
+    pointer-events: none;
+    letter-spacing: 1rem;
+    font-weight: 300;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
 }
 
 .hero-content h1 {
@@ -372,22 +508,55 @@ body {
     color: white;
     padding: 80px 20px;
     text-align: center;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '📈 📊 💹';
+    position: absolute;
+    top: 15%;
+    left: 5%;
+    font-size: 4rem;
+    opacity: 0.08;
+    transform: rotate(-10deg);
+    pointer-events: none;
+}
+
+.page-header::after {
+    content: '$ £ €';
+    position: absolute;
+    bottom: 15%;
+    right: 5%;
+    font-size: 3.5rem;
+    opacity: 0.08;
+    transform: rotate(10deg);
+    pointer-events: none;
+    letter-spacing: 0.8rem;
+    font-weight: 300;
 }
 
 .page-header h1 {
     font-size: 3rem;
     margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
 }
 
 .page-header p {
     font-size: 1.2rem;
     opacity: 0.9;
+    position: relative;
+    z-index: 1;
 }
 
 /* Content Section */
 .content-section {
     padding: 60px 20px;
     background: var(--bg-light);
+    position: relative;
+    z-index: 1;
 }
 
 .content-tabs {

@@ -1249,74 +1249,121 @@ async function loadDailyUpdates() {
         console.log('Daily updates file loaded successfully, content length:', text.length);
         console.log('Raw file content:', text.substring(0, 200));
 
-        // Parse the file - format: Date on first line, then content
-        const lines = text.trim().split('\n');
-        console.log('Total lines in file:', lines.length);
+        // Parse the file - format: Multiple entries separated by "---"
+        // Each entry: Date on first line, then content until next "---" or end
+        const entries = [];
+        // Split by "---" on its own line (with optional whitespace)
+        const sections = text.trim().split(/\n\s*---\s*\n/);
         
-        if (lines.length === 0) {
+        console.log('Total sections found:', sections.length);
+        
+        if (sections.length === 0) {
             throw new Error('File is empty');
         }
 
-        const date = lines[0].trim();
-        const content = lines.slice(1).join('\n').trim();
-        
-        console.log('Parsed date:', date);
-        console.log('Content length:', content.length);
-        console.log('Content preview:', content.substring(0, 100));
-
-        if (!content) {
-            throw new Error('No content found in file');
-        }
-
-        // Format the date
-        let formattedDate = date;
-        try {
-            const updateDate = new Date(date);
-            if (!isNaN(updateDate.getTime())) {
-                formattedDate = updateDate.toLocaleDateString('en-IN', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-            }
-        } catch (e) {
-            console.warn('Date parsing failed, using original date:', e);
-        }
-
-        // Process content lines
-        const processedContent = content.split('\n').map(line => {
-            const trimmedLine = line.trim();
+        // Parse each section
+        sections.forEach((section, index) => {
+            const trimmedSection = section.trim();
+            if (!trimmedSection) return;
             
-            if (trimmedLine === '') {
-                return '<br>';
-            } else if (trimmedLine.startsWith('- ')) {
-                return `<p class="update-bullet">${trimmedLine.substring(2)}</p>`;
-            } else if (trimmedLine.startsWith('• ')) {
-                return `<p class="update-bullet">${trimmedLine.substring(2)}</p>`;
-            } else if (trimmedLine.startsWith('-')) {
-                return `<p class="update-bullet">${trimmedLine.substring(1).trim()}</p>`;
-            } else if (trimmedLine.startsWith('•')) {
-                return `<p class="update-bullet">${trimmedLine.substring(1).trim()}</p>`;
-            } else if (trimmedLine.toLowerCase().includes('highlights') || trimmedLine.toLowerCase().includes('key')) {
-                return `<h4 class="update-subheading">${trimmedLine}</h4>`;
+            const lines = trimmedSection.split('\n');
+            if (lines.length === 0) return;
+            
+            const date = lines[0].trim();
+            const content = lines.slice(1).join('\n').trim();
+            
+            // Check if date is in YYYY-MM-DD format
+            const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+            if (datePattern.test(date) && content) {
+                entries.push({ date, content });
+                console.log(`Entry ${index + 1}: Date = ${date}, Content length = ${content.length}`);
             } else {
-                return `<p>${trimmedLine}</p>`;
+                console.warn(`Skipping section ${index + 1}: Invalid date format or empty content. Date: "${date}", Content length: ${content.length}`);
             }
+        });
+
+        if (entries.length === 0) {
+            throw new Error('No valid entries found in file');
+        }
+
+        console.log(`Total valid entries: ${entries.length}`);
+
+        // Sort entries by date (newest first)
+        entries.sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return dateB - dateA; // Descending order (newest first)
+        });
+
+        // Process and create HTML for all entries
+        const updatesHTML = entries.map((entry, index) => {
+            // Format the date
+            let formattedDate = entry.date;
+            try {
+                const updateDate = new Date(entry.date);
+                if (!isNaN(updateDate.getTime())) {
+                    formattedDate = updateDate.toLocaleDateString('en-IN', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                }
+            } catch (e) {
+                console.warn('Date parsing failed, using original date:', e);
+            }
+
+            // Process content lines
+            const processedContent = entry.content.split('\n').map(line => {
+                const trimmedLine = line.trim();
+                
+                if (trimmedLine === '') {
+                    return '<br>';
+                } else if (trimmedLine.startsWith('- ')) {
+                    return `<p class="update-bullet">${trimmedLine.substring(2)}</p>`;
+                } else if (trimmedLine.startsWith('• ')) {
+                    return `<p class="update-bullet">${trimmedLine.substring(2)}</p>`;
+                } else if (trimmedLine.startsWith('-')) {
+                    return `<p class="update-bullet">${trimmedLine.substring(1).trim()}</p>`;
+                } else if (trimmedLine.startsWith('•')) {
+                    return `<p class="update-bullet">${trimmedLine.substring(1).trim()}</p>`;
+                } else if (trimmedLine.toLowerCase().includes('highlights') || trimmedLine.toLowerCase().includes('key')) {
+                    return `<h4 class="update-subheading">${trimmedLine}</h4>`;
+                } else {
+                    return `<p>${trimmedLine}</p>`;
+                }
+            }).join('');
+
+            // Determine title based on date
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const entryDate = new Date(entry.date);
+            entryDate.setHours(0, 0, 0, 0);
+            
+            let title = "Market Update";
+            if (entryDate.getTime() === today.getTime()) {
+                title = "Today's Market Update";
+            } else if (entryDate.getTime() === today.getTime() - 86400000) {
+                title = "Yesterday's Market Update";
+            } else {
+                title = "Market Update";
+            }
+
+            return `
+                <div class="daily-update-card">
+                    <div class="update-header">
+                        <h3>${title}</h3>
+                        <span class="update-date">${formattedDate}</span>
+                    </div>
+                    <div class="update-content">
+                        ${processedContent}
+                    </div>
+                </div>
+            `;
         }).join('');
 
-        // Create HTML for daily update
-        updatesContainer.innerHTML = `
-            <div class="daily-update-card">
-                <div class="update-header">
-                    <h3>Today's Market Update</h3>
-                    <span class="update-date">${formattedDate}</span>
-                </div>
-                <div class="update-content">
-                    ${processedContent}
-                </div>
-            </div>
-        `;
+        // Create HTML for all daily updates
+        updatesContainer.innerHTML = updatesHTML;
 
         console.log('Daily updates displayed successfully');
         console.log('Final HTML:', updatesContainer.innerHTML.substring(0, 200));
