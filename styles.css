@@ -1878,11 +1878,6 @@ footer {
     text-decoration: underline;
 }
 
-/* @media (min-width: 1200px) {
-    .logo-text {
-        font-size: 2.5rem !important;;
-    }
-} */
 
 /* Responsive Design */
 @media (max-width: 768px) {

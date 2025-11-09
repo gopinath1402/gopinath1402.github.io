@@ -19,104 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Tab Switching for Content Page
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    console.log('Tab buttons found:', tabBtns.length);
-    console.log('Tab contents found:', tabContents.length);
-
-    // Function to switch tabs
-    function switchTab(targetTab) {
-        console.log('Switching to tab:', targetTab);
-        
-        // Remove active class from all buttons and contents
-        tabBtns.forEach(b => b.classList.remove('active'));
-        tabContents.forEach(content => content.classList.remove('active'));
-
-        // Find the button with matching data-tab
-        const targetBtn = Array.from(tabBtns).find(btn => btn.getAttribute('data-tab') === targetTab);
-        const targetElement = document.getElementById(targetTab);
-        
-        console.log('Target button found:', !!targetBtn);
-        console.log('Target element found:', !!targetElement);
-        
-        if (targetBtn && targetElement) {
-            targetBtn.classList.add('active');
-            targetElement.classList.add('active');
-            
-            // If macroeconomics tab is clicked, ensure videos are loaded
-            if (targetTab === 'macroeconomics') {
-                const videosContainer = document.getElementById('videos-container');
-                if (videosContainer) {
-                    // Check if videos are already loaded or if container is empty
-                    const hasVideos = videosContainer.querySelectorAll('.video-item').length > 0;
-                    const hasError = videosContainer.querySelector('.error') !== null;
-                    const isLoading = videosContainer.querySelector('.loading') !== null;
-                    
-                    if ((!hasVideos && !hasError) || isLoading) {
-                        console.log('Macroeconomics tab opened - loading videos from videos.txt');
-                        loadVideosFromFile();
-                    }
-                }
-            }
-            
-            // If current market tab is clicked, ensure market data is loaded
-            if (targetTab === 'current-market') {
-                const marketContainer = document.getElementById('daily-market-container');
-                if (marketContainer) {
-                    const hasData = marketContainer.querySelectorAll('.market-section').length > 0;
-                    const isLoading = marketContainer.querySelector('.loading') !== null;
-                    
-                    if (!hasData || isLoading) {
-                        console.log('Current Market Update tab opened - loading market data');
-                        loadLiveMarketData();
-                    }
-                }
-            }
-        } else {
-            console.error('Tab switch failed - target button or element not found');
-        }
-    }
-
-    // Handle tab button clicks
-    if (tabBtns.length > 0) {
-        tabBtns.forEach((btn, index) => {
-            const tabId = btn.getAttribute('data-tab');
-            console.log(`Attaching click listener to tab ${index}: ${tabId}`);
-            
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const targetTab = this.getAttribute('data-tab');
-                console.log('Tab button clicked:', targetTab);
-                switchTab(targetTab);
-            });
-        });
-    } else {
-        console.warn('No tab buttons found on page');
-    }
-
-    // Handle hash navigation (from header links)
-    function handleHashNavigation() {
-        const hash = window.location.hash.substring(1); // Remove the #
-        if (hash === 'current-market' || hash === 'macroeconomics') {
-            // Small delay to ensure page is loaded
-            setTimeout(() => {
-                switchTab(hash);
-                // Scroll to top of content section
-                const contentSection = document.querySelector('.content-section');
-                if (contentSection) {
-                    contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 100);
-        }
-    }
-
-    // Check hash on page load
-    if (window.location.pathname.includes('content.html')) {
-        handleHashNavigation();
-    }
 
     // Update active navigation state based on current page
     function updateActiveNav() {
@@ -146,59 +48,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update on hash change
     window.addEventListener('hashchange', function() {
         updateActiveNav();
-        if (window.location.pathname.includes('content.html')) {
-            handleHashNavigation();
-        }
     });
 
     // Load content based on current page
-    console.log('=== PAGE LOAD CHECK ===');
-    console.log('Current page path:', window.location.pathname);
-    console.log('Current page href:', window.location.href);
-    console.log('Path includes content.html?', window.location.pathname.includes('content.html'));
-    console.log('Path includes macroeconomics.html?', window.location.pathname.includes('macroeconomics.html'));
-    
     if (window.location.pathname.includes('content.html') || window.location.href.includes('content.html')) {
         // Load Daily Updates and Market data (for Current Market Update page)
-        console.log('✓ Loading content for Current Market Update page');
-        console.log('✓ Calling loadDailyUpdates() and loadLiveMarketData()');
-        
-        // Check if function exists
-        if (typeof loadDailyUpdates === 'function') {
-            console.log('✓ loadDailyUpdates function exists');
-        } else {
-            console.error('✗ loadDailyUpdates function NOT FOUND!');
-        }
-        
-        // Small delay to ensure DOM is fully ready
         setTimeout(() => {
-            console.log('✓ setTimeout callback executing - calling functions now');
-            console.log('✓ Checking if loadDailyUpdates exists:', typeof loadDailyUpdates);
-            console.log('✓ Checking if loadLiveMarketData exists:', typeof loadLiveMarketData);
-            
             if (typeof loadDailyUpdates === 'function') {
-                console.log('✓ Calling loadDailyUpdates() now...');
                 loadDailyUpdates().catch(err => {
-                    console.error('✗ Error in loadDailyUpdates:', err);
+                    console.error('Error in loadDailyUpdates:', err);
                 });
-            } else {
-                console.error('✗ loadDailyUpdates is not a function! Type:', typeof loadDailyUpdates);
             }
-            
             if (typeof loadLiveMarketData === 'function') {
                 loadLiveMarketData();
             }
         }, 100);
     } else if (window.location.pathname.includes('macroeconomics.html') || window.location.href.includes('macroeconomics.html')) {
         // Load videos automatically on macroeconomics page
-        console.log('Macroeconomics page loaded - loading videos from videos.txt');
         loadVideosFromFile();
-    } else {
-        console.log('Page is neither content.html nor macroeconomics.html');
     }
-    
-    // Note: Videos will be loaded automatically on macroeconomics.html page
-    // Documents and Articles tabs have been removed - content is now in separate pages
 
     // Contact Form Handling
     const contactForm = document.getElementById('contactForm');
@@ -764,330 +632,7 @@ function createVideoItem(videoId, index, title = `Video ${index + 1}`) {
     return item;
 }
 
-// Function to load documents from documents.txt file
-async function loadDocumentsFromFile() {
-    const documentsContainer = document.getElementById('documents-container');
-    if (!documentsContainer) return;
-
-    // Always try to fetch from file first
-    console.log('Loading documents from documents.txt...');
-
-    try {
-        // Add cache-busting parameter to force fresh fetch
-        const cacheBuster = new Date().getTime();
-        const response = await fetch(`documents.txt?t=${cacheBuster}`, {
-            cache: 'no-store',
-            headers: {
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            }
-        });
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const text = await response.text();
-        const lines = text.split('\n').filter(line => line.trim() !== '');
-        
-        if (lines.length === 0) {
-            documentsContainer.innerHTML = '<div class="error">No documents found in documents.txt file. Please add document information to the file.</div>';
-            return;
-        }
-
-        // Clear loading message
-        documentsContainer.innerHTML = '';
-        documentsContainer.className = 'content-grid';
-
-        // Process each line in order (format: title,filepath or just filepath)
-        lines.forEach((line, index) => {
-            const trimmedLine = line.trim();
-            if (!trimmedLine) return;
-
-            // Check if line has title,filepath format
-            let title = '';
-            let filepath = trimmedLine;
-            
-            if (trimmedLine.includes(',')) {
-                const parts = trimmedLine.split(',');
-                if (parts.length >= 2) {
-                    title = parts[0].trim();
-                    filepath = parts.slice(1).join(',').trim(); // Join in case filepath has commas
-                }
-            }
-
-            // Use title or default to "Document X"
-            const displayTitle = title || `Document ${index + 1}`;
-
-            // Create document item
-            const docItem = createDocumentItem(filepath, index, displayTitle);
-            documentsContainer.appendChild(docItem);
-        });
-
-    } catch (error) {
-        console.error('Error loading documents:', error);
-        
-        // More detailed error message
-        let errorMsg = 'Error loading documents.txt file. ';
-        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            errorMsg += 'Please ensure documents.txt is in the same directory. ';
-            if (window.location.protocol === 'file:') {
-                errorMsg += 'For local testing, use a local server: python -m http.server 8000';
-            }
-        } else {
-            errorMsg += `Error: ${error.message}`;
-        }
-        
-        documentsContainer.innerHTML = `<div class="error">${errorMsg} <br><br><strong>Using fallback list. Changes to documents.txt will NOT be reflected until the file loads successfully.</strong> <br>Please refresh or check documents.txt file.</div>`;
-        
-        // Try fallback embedded list only as last resort
-        console.warn('Using embedded document list as fallback - documents.txt could not be loaded');
-        useEmbeddedDocumentList(documentsContainer);
-    }
-}
-
-// Fallback: Use embedded document list (ONLY as last resort if txt file cannot be loaded)
-function useEmbeddedDocumentList(container) {
-    console.warn('WARNING: Using embedded document list. This means documents.txt could not be loaded.');
-    console.warn('Please ensure documents.txt exists and is accessible. Changes to documents.txt will NOT be reflected until the file loads successfully.');
-    
-    // This is a minimal fallback - should not normally be used
-    const embeddedDocuments = [
-        ['documents/q4-2023-market-report.pdf', 'Q4 2023 Market Report'],
-        ['documents/investment-portfolio-strategy.pdf', 'Investment Portfolio Strategy Guide'],
-        ['documents/tax-planning-checklist-2024.pdf', 'Tax Planning Checklist 2024'],
-        ['documents/real-estate-investment-analysis.pdf', 'Real Estate Investment Analysis']
-    ];
-
-    container.innerHTML = '';
-    container.className = 'content-grid';
-
-    embeddedDocuments.forEach((docData, index) => {
-        const filepath = docData[0];
-        const title = docData[1] || `Document ${index + 1}`;
-        const docItem = createDocumentItem(filepath, index, title);
-        container.appendChild(docItem);
-    });
-}
-
-// Function to create a document item
-function createDocumentItem(filepath, index, title) {
-    const item = document.createElement('div');
-    item.className = 'content-item';
-    
-    // Get file extension to determine document type
-    const fileExt = filepath.split('.').pop().toLowerCase();
-    const isPdf = fileExt === 'pdf';
-
-    item.innerHTML = `
-        <div class="content-thumbnail doc-thumbnail" data-filepath="${filepath}">
-            <div class="doc-preview">
-                <div class="doc-icon">📄</div>
-                <div class="doc-lines"></div>
-            </div>
-        </div>
-        <h3>${title}</h3>
-        <p class="content-meta">${fileExt.toUpperCase()} | Click to view</p>
-        <p class="content-description">Click the document above to read online or download.</p>
-        <div class="doc-actions">
-            <a href="${filepath}" target="_blank" class="doc-action-btn doc-read-btn" title="Read Online">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    <path d="M14 2V8H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    <path d="M8 12H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-                    <path d="M8 15H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-                    <path d="M8 18H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-                </svg>
-            </a>
-            <a href="${filepath}" download class="doc-action-btn doc-download-btn" title="Download">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    <path d="M8 9L12 5L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    <path d="M3 15V19C3 19.5304 3.21071 20.0391 3.58579 20.4142C3.96086 20.7893 4.46957 21 5 21H19C19.5304 21 20.0391 20.7893 20.4142 20.4142C20.7893 20.0391 21 19.5304 21 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                </svg>
-            </a>
-        </div>
-    `;
-
-    // Make thumbnail clickable to open document
-    const thumbnail = item.querySelector('.doc-thumbnail');
-    thumbnail.style.cursor = 'pointer';
-    thumbnail.addEventListener('click', function(e) {
-        e.preventDefault();
-        // Open PDF in new tab for reading
-        window.open(filepath, '_blank', 'noopener,noreferrer');
-    });
-
-    return item;
-}
-
-// Function to load articles from articles.txt file
-async function loadArticlesFromFile() {
-    const articlesContainer = document.getElementById('articles-container');
-    if (!articlesContainer) {
-        console.error('articles-container not found in DOM');
-        return;
-    }
-
-    console.log('Loading articles from articles.txt...');
-
-    // Always try to fetch from file first, even if local
-    // If fetch fails, then use embedded list as fallback
-
-    try {
-        // Add cache-busting parameter to force fresh fetch
-        const cacheBuster = new Date().getTime();
-        const response = await fetch(`articles.txt?t=${cacheBuster}`, {
-            cache: 'no-store',
-            headers: {
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            }
-        });
-        
-        console.log('Articles.txt fetch response:', response.status, response.statusText);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const text = await response.text();
-        console.log('Raw file content:', text.substring(0, 200) + '...');
-        
-        const lines = text.split('\n').filter(line => line.trim() !== '');
-        console.log(`Found ${lines.length} lines in articles.txt`);
-        
-        if (lines.length === 0) {
-            articlesContainer.innerHTML = '<div class="error">No articles found in articles.txt file. Please add article information to the file.</div>';
-            return;
-        }
-
-        // Clear loading message
-        articlesContainer.innerHTML = '';
-        articlesContainer.className = 'content-list';
-
-        // Process each line in order (format: title,excerpt,link,date)
-        lines.forEach((line, index) => {
-            const trimmedLine = line.trim();
-            if (!trimmedLine) return;
-
-            // Parse title, excerpt, link, and date
-            // Since excerpt can contain commas, we need a smarter parsing strategy
-            // Format: title,excerpt,link,date
-            // We'll split by comma but handle the excerpt field carefully
-            
-            let title = '';
-            let excerpt = '';
-            let link = '';
-            let date = '';
-            
-            // Find the last 2 commas which separate link and date
-            const lastCommaIndex = trimmedLine.lastIndexOf(',');
-            if (lastCommaIndex === -1) {
-                // No commas, treat as title only
-                title = trimmedLine;
-            } else {
-                // Extract date (everything after last comma)
-                date = trimmedLine.substring(lastCommaIndex + 1).trim();
-                
-                // Find second-to-last comma for link
-                const secondLastCommaIndex = trimmedLine.lastIndexOf(',', lastCommaIndex - 1);
-                if (secondLastCommaIndex === -1) {
-                    // Only one comma, format might be: title,excerpt or title,date
-                    // If date looks like YYYY-MM-DD, then we have: title,date
-                    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-                        title = trimmedLine.substring(0, lastCommaIndex).trim();
-                        excerpt = '';
-                        link = '';
-                    } else {
-                        // Format: title,excerpt
-                        title = trimmedLine.substring(0, lastCommaIndex).trim();
-                        excerpt = date;
-                        date = '';
-                        link = '';
-                    }
-                } else {
-                    // Extract link (between second-last and last comma)
-                    link = trimmedLine.substring(secondLastCommaIndex + 1, lastCommaIndex).trim();
-                    
-                    // Find first comma for title
-                    const firstCommaIndex = trimmedLine.indexOf(',');
-                    if (firstCommaIndex === -1 || firstCommaIndex === secondLastCommaIndex) {
-                        // No title separator or only one separator before link
-                        title = trimmedLine.substring(0, secondLastCommaIndex).trim();
-                        excerpt = '';
-                    } else {
-                        // Extract title (before first comma)
-                        title = trimmedLine.substring(0, firstCommaIndex).trim();
-                        // Extract excerpt (between first and second-last comma)
-                        excerpt = trimmedLine.substring(firstCommaIndex + 1, secondLastCommaIndex).trim();
-                    }
-                }
-            }
-
-            // Debug logging - show full parsing results
-            console.log(`Article ${index + 1}:`, { 
-                title: title || '(empty)', 
-                excerpt: excerpt ? (excerpt.length > 50 ? excerpt.substring(0, 50) + '...' : excerpt) : '(empty)', 
-                link: link || '(empty)', 
-                date: date || '(empty)',
-                rawLine: trimmedLine.substring(0, 100) + '...'
-            });
-
-            // Create article item
-            const articleItem = createArticleItem(title, excerpt, link, index, date);
-            articlesContainer.appendChild(articleItem);
-        });
-
-    } catch (error) {
-        console.error('Error loading articles:', error);
-        
-        // More detailed error message
-        let errorMsg = 'Error loading articles.txt file. ';
-        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            errorMsg += 'Please ensure articles.txt is in the same directory. ';
-            if (window.location.protocol === 'file:') {
-                errorMsg += 'For local testing, use a local server: python -m http.server 8000';
-            }
-        } else {
-            errorMsg += `Error: ${error.message}`;
-        }
-        
-        articlesContainer.innerHTML = `<div class="error">${errorMsg} <br><br><strong>Using fallback list. Changes to articles.txt will NOT be reflected until the file loads successfully.</strong> <br>Please refresh or check articles.txt file.</div>`;
-        
-        // Try fallback embedded list only as last resort
-        console.warn('Using embedded article list as fallback - articles.txt could not be loaded');
-        useEmbeddedArticleList(articlesContainer);
-    }
-}
-
-// Fallback: Use embedded article list (ONLY as last resort if txt file cannot be loaded)
-function useEmbeddedArticleList(container) {
-    console.warn('WARNING: Using embedded article list. This means articles.txt could not be loaded.');
-    console.warn('Please ensure articles.txt exists and is accessible. Changes to articles.txt will NOT be reflected until the file loads successfully.');
-    
-    // This is a minimal fallback - should not normally be used
-    const embeddedArticles = [
-        ['5 Key Financial Trends to Watch in 2027', 'Explore the most important financial trends that will shape the economy and investment landscape this year. From digital currencies to sustainable investing, we break down what matters most for investors and businesses alike.', 'articles/financial-trends-2024.html', '2024-11-18'],
-        ['Year-End Financial Review Checklist', 'Essential steps to review your financial health and prepare for the upcoming year. This comprehensive guide helps you assess your portfolio, optimize tax strategies, and set financial goals.', 'articles/year-end-review.html', '2023-12-28'],
-        ['Understanding Cryptocurrency Regulations', 'A comprehensive overview of how new regulations are affecting cryptocurrency markets and what investors should know. We discuss the latest regulatory framework and its implications for the digital asset space.', 'articles/crypto-regulations.html', '2024-10-22'],
-        ['Emergency Fund: How Much is Enough?', 'Breaking down the myths and providing practical advice on building an emergency fund that works for your situation. Learn how to calculate the right amount based on your lifestyle and financial obligations.', 'articles/emergency-fund-guide.html', '2024-01-05']
-    ];
-
-    container.innerHTML = '';
-    container.className = 'content-list';
-
-    embeddedArticles.forEach((articleData, index) => {
-        const title = articleData[0];
-        const excerpt = articleData[1] || '';
-        const link = articleData[2] || '';
-        const date = articleData[3] || '';
-        const articleItem = createArticleItem(title, excerpt, link, index, date);
-        container.appendChild(articleItem);
-    });
-}
-
-// Function to create an article item
+// Function to create an article item (kept for potential future use)
 function createArticleItem(title, excerpt, link, index, dateString = '') {
     // Parse date from string or use current date as fallback
     let articleDate;
@@ -1199,24 +744,18 @@ function createArticleItem(title, excerpt, link, index, dateString = '') {
 }
 
 // Load Daily Updates from daily-updates.txt
-// This function must be defined in global scope
 async function loadDailyUpdates() {
-    console.log('=== loadDailyUpdates function called ===');
     const updatesContainer = document.getElementById('daily-updates-container');
     if (!updatesContainer) {
-        console.error('✗ Daily updates container not found - element with id "daily-updates-container" does not exist');
+        console.error('Daily updates container not found');
         return;
     }
-
-    console.log('✓ Daily updates container found, loading from daily-updates.txt');
 
     try {
         // Check if we're using file:// protocol (local file access)
         const isLocal = window.location.protocol === 'file:';
-        console.log('Protocol:', window.location.protocol, 'isLocal:', isLocal);
         
         if (isLocal) {
-            console.warn('Using file:// protocol - fetch may not work. Please use HTTP server (python -m http.server 8000)');
             updatesContainer.innerHTML = `
                 <div class="error-message" style="background: #fff3cd; padding: 1rem; border-radius: 8px; border: 2px solid #ffc107;">
                     <p style="color: #856404; font-weight: bold;">⚠️ Local File Access Detected</p>
@@ -1230,7 +769,6 @@ async function loadDailyUpdates() {
         
         const timestamp = new Date().getTime();
         const fileUrl = `daily-updates.txt?t=${timestamp}`;
-        console.log('Fetching from:', fileUrl);
         
         const response = await fetch(fileUrl, {
             cache: 'no-store',
@@ -1239,15 +777,11 @@ async function loadDailyUpdates() {
             }
         });
 
-        console.log('Fetch response status:', response.status, response.statusText);
-
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
         }
 
         const text = await response.text();
-        console.log('Daily updates file loaded successfully, content length:', text.length);
-        console.log('Raw file content:', text.substring(0, 200));
 
         // Parse the file - format: Multiple entries separated by "---"
         // Each entry: Date on first line, then content until next "---" or end
@@ -1255,14 +789,12 @@ async function loadDailyUpdates() {
         // Split by "---" on its own line (with optional whitespace)
         const sections = text.trim().split(/\n\s*---\s*\n/);
         
-        console.log('Total sections found:', sections.length);
-        
         if (sections.length === 0) {
             throw new Error('File is empty');
         }
 
         // Parse each section
-        sections.forEach((section, index) => {
+        sections.forEach((section) => {
             const trimmedSection = section.trim();
             if (!trimmedSection) return;
             
@@ -1276,17 +808,12 @@ async function loadDailyUpdates() {
             const datePattern = /^\d{4}-\d{2}-\d{2}$/;
             if (datePattern.test(date) && content) {
                 entries.push({ date, content });
-                console.log(`Entry ${index + 1}: Date = ${date}, Content length = ${content.length}`);
-            } else {
-                console.warn(`Skipping section ${index + 1}: Invalid date format or empty content. Date: "${date}", Content length: ${content.length}`);
             }
         });
 
         if (entries.length === 0) {
             throw new Error('No valid entries found in file');
         }
-
-        console.log(`Total valid entries: ${entries.length}`);
 
         // Sort entries by date (newest first)
         entries.sort((a, b) => {
@@ -2417,256 +1944,4 @@ function createTechnicalPulseSection(container, comments) {
     container.appendChild(section);
 }
 
-// DEPRECATED: Old function - keeping for reference but not used
-async function loadMarketDataFromFile() {
-    const marketContainer = document.getElementById('daily-market-container');
-    const updateContainer = document.getElementById('daily-update-container');
-    const updateTimeText = document.getElementById('update-time-text');
-    const updateNoteText = document.getElementById('update-note-text');
-    
-    if (!marketContainer) {
-        console.error('daily-market-container element not found');
-        return;
-    }
-    
-    console.log('Loading market data from market-data.txt...');
-    
-    try {
-        // Add cache-busting parameter
-        const cacheBuster = new Date().getTime();
-        const url = `market-data.txt?t=${cacheBuster}`;
-        
-        const response = await fetch(url, {
-            cache: 'no-store',
-            headers: {
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const text = await response.text();
-        console.log('market-data.txt loaded successfully!');
-        
-        const lines = text.split('\n').filter(line => line.trim() !== '');
-        
-        if (lines.length === 0) {
-            marketContainer.innerHTML = '<div class="error">No market data found in market-data.txt file.</div>';
-            return;
-        }
-        
-        // Clear loading message
-        marketContainer.innerHTML = '';
-        marketContainer.className = 'daily-market-grid';
-        
-        let currentSection = null;
-        let sectionTitle = '';
-        let isHighlight = false;
-        let technicalPulse = [];
-        let lastComment = '';
-        
-        lines.forEach((line, index) => {
-            const trimmedLine = line.trim();
-            if (!trimmedLine) return;
-            
-            // Check if this is a section header
-            if (trimmedLine === 'FX_Majors' || trimmedLine === 'Dollar_Index' || 
-                trimmedLine === 'USDINR' || trimmedLine === 'Indian_Equity_Indices' ||
-                trimmedLine === 'FPI/DII_Activity' || trimmedLine === 'Technical_Pulse' || 
-                trimmedLine === 'Last_Updated') {
-                
-                // Save previous section if exists
-                if (currentSection) {
-                    if (lastComment && sectionTitle !== 'Technical Pulse') {
-                        const comment = document.createElement('p');
-                        comment.className = 'market-comment';
-                        comment.textContent = lastComment;
-                        currentSection.appendChild(comment);
-                        lastComment = '';
-                    }
-                    marketContainer.appendChild(currentSection);
-                }
-                
-                // Create new section
-                currentSection = document.createElement('div');
-                
-                if (trimmedLine === 'FX_Majors') {
-                    sectionTitle = 'FX Majors';
-                    isHighlight = false;
-                } else if (trimmedLine === 'Dollar_Index') {
-                    sectionTitle = 'Dollar Index';
-                    isHighlight = true;
-                } else if (trimmedLine === 'USDINR') {
-                    sectionTitle = 'USDINR';
-                    isHighlight = true;
-                } else if (trimmedLine === 'Indian_Equity_Indices') {
-                    sectionTitle = 'Indian Equity Indices';
-                    isHighlight = false;
-                } else if (trimmedLine === 'FPI/DII_Activity') {
-                    sectionTitle = 'FPI/DII Activity';
-                    isHighlight = false;
-                } else if (trimmedLine === 'Technical_Pulse') {
-                    sectionTitle = 'Technical Pulse';
-                    technicalPulse = [];
-                } else if (trimmedLine === 'Last_Updated') {
-                    currentSection = null;
-                }
-                
-                if (currentSection && sectionTitle !== 'Technical Pulse' && trimmedLine !== 'Last_Updated') {
-                    currentSection.className = 'market-section';
-                    
-                    const h3 = document.createElement('h3');
-                    h3.textContent = sectionTitle;
-                    currentSection.appendChild(h3);
-                }
-            } else if (currentSection && sectionTitle !== 'Technical Pulse' && sectionTitle !== 'Last_Updated') {
-                // Parse market data line: pair,price,change,direction
-                const parts = trimmedLine.split(',');
-                
-                if (parts.length >= 3) {
-                    const pair = parts[0].trim();
-                    const price = parts[1].trim();
-                    const change = parts[2].trim();
-                    const direction = parts.length >= 4 ? parts[3].trim() : 'neutral';
-                    
-                    // Check if this is a comment (doesn't look like market data)
-                    if (parts.length === 1 || (!change.includes('%') && !change.includes('₹') && 
-                        !change.includes('Cr') && change !== 'Buying' && change !== 'Selling' && 
-                        !change.match(/^[+-]/) && isNaN(parseFloat(change)))) {
-                        // This is a comment line
-                        lastComment = trimmedLine;
-                    } else {
-                        // This is a market item
-                        const item = document.createElement('div');
-                        item.className = 'market-item';
-                        if (isHighlight && !currentSection.querySelector('.market-item.highlight')) {
-                            item.classList.add('highlight');
-                        }
-                        
-                        const pairSpan = document.createElement('span');
-                        pairSpan.className = 'market-pair';
-                        pairSpan.textContent = pair;
-                        
-                        const priceSpan = document.createElement('span');
-                        priceSpan.className = 'market-price';
-                        if (direction === 'up') {
-                            priceSpan.classList.add('up');
-                        } else if (direction === 'down') {
-                            priceSpan.classList.add('down');
-                        }
-                        priceSpan.textContent = price;
-                        
-                        const changeSpan = document.createElement('span');
-                        changeSpan.className = 'market-change';
-                        changeSpan.textContent = change;
-                        
-                        item.appendChild(pairSpan);
-                        item.appendChild(priceSpan);
-                        item.appendChild(changeSpan);
-                        
-                        currentSection.appendChild(item);
-                    }
-                } else if (trimmedLine && !trimmedLine.includes(',')) {
-                    // Single line comment
-                    lastComment = trimmedLine;
-                }
-            } else if (trimmedLine && sectionTitle === 'Technical Pulse') {
-                // Collect technical pulse lines
-                technicalPulse.push(trimmedLine);
-            }
-        });
-        
-        // Add last section if exists
-        if (currentSection) {
-            if (lastComment) {
-                const comment = document.createElement('p');
-                comment.className = 'market-comment';
-                comment.textContent = lastComment;
-                currentSection.appendChild(comment);
-            }
-            marketContainer.appendChild(currentSection);
-        }
-        
-        // Add Technical Pulse section
-        if (technicalPulse.length > 0) {
-            const techSection = document.createElement('div');
-            techSection.className = 'market-section full-width';
-            
-            const h3 = document.createElement('h3');
-            h3.textContent = 'Technical Pulse';
-            techSection.appendChild(h3);
-            
-            const techView = document.createElement('div');
-            techView.className = 'technical-view';
-            
-            technicalPulse.forEach(line => {
-                const parts = line.split(':');
-                if (parts.length === 2) {
-                    const p = document.createElement('p');
-                    const strong = document.createElement('strong');
-                    strong.textContent = parts[0].trim() + ':';
-                    p.appendChild(strong);
-                    p.appendChild(document.createTextNode(' ' + parts[1].trim()));
-                    techView.appendChild(p);
-                } else {
-                    const p = document.createElement('p');
-                    p.textContent = line;
-                    techView.appendChild(p);
-                }
-            });
-            
-            techSection.appendChild(techView);
-            marketContainer.appendChild(techSection);
-        }
-        
-        // Parse Last Updated section
-        let updateTime = 'Today, 6:00 PM IST';
-        let updateNote = 'Markets closed. Next session opens tomorrow at 9:15 AM IST.';
-        let inUpdateSection = false;
-        
-        lines.forEach((line, index) => {
-            const trimmed = line.trim();
-            if (trimmed === 'Last_Updated') {
-                inUpdateSection = true;
-            } else if (inUpdateSection && trimmed && !trimmed.includes('Last_Updated')) {
-                if (index > 0 && lines[index - 1].trim() === 'Last_Updated') {
-                    updateTime = trimmed;
-                } else {
-                    updateNote = trimmed;
-                }
-            }
-        });
-        
-        if (updateTimeText) updateTimeText.textContent = updateTime;
-        if (updateNoteText) updateNoteText.textContent = updateNote;
-        if (updateContainer) {
-            updateContainer.style.display = 'block';
-        }
-        
-        console.log('✅ Market data loaded successfully');
-        
-    } catch (error) {
-        console.error('❌ ERROR: Failed to load market-data.txt file!');
-        console.error('Error details:', error);
-        
-        let errorMsg = 'Error loading market data. ';
-        
-        if (error.message.includes('Failed to fetch') || error.message.includes('CORS')) {
-            if (window.location.protocol === 'file:') {
-                errorMsg += 'Please use a local server (python -m http.server 8000)';
-            } else {
-                errorMsg += 'Please ensure market-data.txt is in the same directory.';
-            }
-        } else {
-            errorMsg += `Error: ${error.message}`;
-        }
-        
-        marketContainer.innerHTML = `<div class="error">${errorMsg}</div>`;
-        console.warn('⚠️ Market data could not be loaded');
-    }
-}
 
