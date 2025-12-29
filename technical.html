@@ -82,8 +82,8 @@
         // Additional test to ensure function is called
         window.addEventListener('load', function() {
             console.log('=== Window load event fired ===');
-            if (window.location.pathname.includes('content.html') || window.location.href.includes('content.html')) {
-                console.log('=== Additional check: content.html page detected ===');
+            if (window.location.pathname.includes('technical.html') || window.location.href.includes('technical.html')) {
+                console.log('=== Additional check: technical.html page detected ===');
                 setTimeout(function() {
                     console.log('=== Additional setTimeout: checking loadDailyUpdates ===');
                     if (typeof loadDailyUpdates === 'function') {
