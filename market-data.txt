@@ -1,23 +1,3 @@
-FX_Majors
-EUR/USD,1.0850,+0.12%,up
-GBP/USD,1.2650,+0.08%,up
-USD/JPY,149.50,-0.15%,down
-USD/CHF,0.8720,0.00%,neutral
-
-Dollar_Index
-Dollar pulling back from recent highs as risk sentiment improves.
-
-USDINR
-Rupee under pressure as dollar strength persists. RBI likely watching closely.
-
-Indian_Equity_Indices
-Nifty 50,22450,+0.85%,up
-Bank Nifty,48200,+1.12%,up
-Banks leading the rally on improved credit growth outlook.
-
-FPI/DII_Activity
-FPI (Net),+₹1,250 Cr,Buying,up
-DII (Net),-₹850 Cr,Selling,down
 
 Technical_Pulse
 Nifty: Trading above key support at 22,200. Next resistance at 22,600. Momentum indicators suggest continuation of uptrend.

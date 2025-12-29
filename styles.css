@@ -2135,3 +2135,28 @@ footer {
     }
 }
 
+.about-content {
+    overflow: hidden; 
+    padding-left: 0;
+}
+
+.profile-pic {
+    float: left;
+    width: 150px;           /* small left space */
+    margin-right: 20px;
+    margin-bottom: 10px;    /* text flows below image */
+    border-radius: 8px;
+    margin: 6px 16px 12px 0; 
+}
+
+.about-text p {
+    margin-bottom: 12px;
+}
+.about-text {
+    padding-left: 0;
+}
+
+.intro-line {
+    margin-bottom: 10px;
+}
+
