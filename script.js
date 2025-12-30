@@ -743,7 +743,7 @@ function createArticleItem(title, excerpt, link, index, dateString = '') {
     return article;
 }
 
-// Update the loadDailyUpdates function to handle <image: path> syntax
+// Ensure the <image: path> syntax is correctly parsed and rendered
 async function loadDailyUpdates() {
     const updatesContainer = document.getElementById('daily-updates-container');
     if (!updatesContainer) {
@@ -818,8 +818,6 @@ async function loadDailyUpdates() {
                     if (imagePath) {
                         return `<img src="${imagePath}" alt="Daily Update Image" style="max-width: 100%; height: auto; margin: 1rem 0;">`;
                     }
-                } else if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('• ')) {
-                    return `<p class="update-bullet">${trimmedLine.substring(2)}</p>`;
                 } else {
                     return `<p>${trimmedLine}</p>`;
                 }
