@@ -743,7 +743,7 @@ function createArticleItem(title, excerpt, link, index, dateString = '') {
     return article;
 }
 
-// Load Daily Updates from daily-updates.txt
+// Update the loadDailyUpdates function to handle <image: path> syntax
 async function loadDailyUpdates() {
     const updatesContainer = document.getElementById('daily-updates-container');
     if (!updatesContainer) {
@@ -752,24 +752,9 @@ async function loadDailyUpdates() {
     }
 
     try {
-        // Check if we're using file:// protocol (local file access)
-        const isLocal = window.location.protocol === 'file:';
-        
-        if (isLocal) {
-            updatesContainer.innerHTML = `
-                <div class="error-message" style="background: #fff3cd; padding: 1rem; border-radius: 8px; border: 2px solid #ffc107;">
-                    <p style="color: #856404; font-weight: bold;">⚠️ Local File Access Detected</p>
-                    <p style="color: #856404; margin-top: 0.5rem;">Please use an HTTP server to load daily-updates.txt</p>
-                    <p style="color: #856404; font-size: 0.9rem; margin-top: 0.5rem;">Run: <code style="background: #fff; padding: 0.2rem 0.5rem; border-radius: 4px;">python -m http.server 8000</code></p>
-                    <p style="color: #856404; font-size: 0.9rem; margin-top: 0.5rem;">Then access: <code style="background: #fff; padding: 0.2rem 0.5rem; border-radius: 4px;">http://localhost:8000/content.html</code></p>
-                </div>
-            `;
-            return;
-        }
-        
         const timestamp = new Date().getTime();
         const fileUrl = `daily-updates.txt?t=${timestamp}`;
-        
+
         const response = await fetch(fileUrl, {
             cache: 'no-store',
             headers: {
@@ -784,27 +769,23 @@ async function loadDailyUpdates() {
         const text = await response.text();
 
         // Parse the file - format: Multiple entries separated by "---"
-        // Each entry: Date on first line, then content until next "---" or end
         const entries = [];
-        // Split by "---" on its own line (with optional whitespace)
         const sections = text.trim().split(/\n\s*---\s*\n/);
-        
+
         if (sections.length === 0) {
             throw new Error('File is empty');
         }
 
-        // Parse each section
         sections.forEach((section) => {
             const trimmedSection = section.trim();
             if (!trimmedSection) return;
-            
+
             const lines = trimmedSection.split('\n');
             if (lines.length === 0) return;
-            
+
             const date = lines[0].trim();
             const content = lines.slice(1).join('\n').trim();
-            
-            // Check if date is in YYYY-MM-DD format
+
             const datePattern = /^\d{4}-\d{2}-\d{2}$/;
             if (datePattern.test(date) && content) {
                 entries.push({ date, content });
@@ -815,71 +796,39 @@ async function loadDailyUpdates() {
             throw new Error('No valid entries found in file');
         }
 
-        // Sort entries by date (newest first)
         entries.sort((a, b) => {
             const dateA = new Date(a.date);
             const dateB = new Date(b.date);
-            return dateB - dateA; // Descending order (newest first)
+            return dateB - dateA;
         });
 
-        // Process and create HTML for all entries
-        const updatesHTML = entries.map((entry, index) => {
-            // Format the date
-            let formattedDate = entry.date;
-            try {
-                const updateDate = new Date(entry.date);
-                if (!isNaN(updateDate.getTime())) {
-                    formattedDate = updateDate.toLocaleDateString('en-IN', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
-                }
-            } catch (e) {
-                console.warn('Date parsing failed, using original date:', e);
-            }
+        const updatesHTML = entries.map((entry) => {
+            const formattedDate = new Date(entry.date).toLocaleDateString('en-IN', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
 
-            // Process content lines
             const processedContent = entry.content.split('\n').map(line => {
                 const trimmedLine = line.trim();
-                
-                if (trimmedLine === '') {
-                    return '<br>';
-                } else if (trimmedLine.startsWith('- ')) {
+
+                if (trimmedLine.startsWith('<image:')) {
+                    const imagePath = trimmedLine.match(/<image:\s*(.*?)>/)?.[1];
+                    if (imagePath) {
+                        return `<img src="${imagePath}" alt="Daily Update Image" style="max-width: 100%; height: auto; margin: 1rem 0;">`;
+                    }
+                } else if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('• ')) {
                     return `<p class="update-bullet">${trimmedLine.substring(2)}</p>`;
-                } else if (trimmedLine.startsWith('• ')) {
-                    return `<p class="update-bullet">${trimmedLine.substring(2)}</p>`;
-                } else if (trimmedLine.startsWith('-')) {
-                    return `<p class="update-bullet">${trimmedLine.substring(1).trim()}</p>`;
-                } else if (trimmedLine.startsWith('•')) {
-                    return `<p class="update-bullet">${trimmedLine.substring(1).trim()}</p>`;
-                } else if (trimmedLine.toLowerCase().includes('highlights') || trimmedLine.toLowerCase().includes('key')) {
-                    return `<h4 class="update-subheading">${trimmedLine}</h4>`;
                 } else {
                     return `<p>${trimmedLine}</p>`;
                 }
             }).join('');
 
-            // Determine title based on date
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const entryDate = new Date(entry.date);
-            entryDate.setHours(0, 0, 0, 0);
-            
-            let title = "Market Update";
-            if (entryDate.getTime() === today.getTime()) {
-                title = "Today's Market Update";
-            } else if (entryDate.getTime() === today.getTime() - 86400000) {
-                title = "Yesterday's Market Update";
-            } else {
-                title = "Market Update";
-            }
-
             return `
                 <div class="daily-update-card">
                     <div class="update-header">
-                        <h3>${title}</h3>
+                        <h3>Market Update</h3>
                         <span class="update-date">${formattedDate}</span>
                     </div>
                     <div class="update-content">
@@ -889,20 +838,14 @@ async function loadDailyUpdates() {
             `;
         }).join('');
 
-        // Create HTML for all daily updates
         updatesContainer.innerHTML = updatesHTML;
-
-        console.log('Daily updates displayed successfully');
-        console.log('Final HTML:', updatesContainer.innerHTML.substring(0, 200));
 
     } catch (error) {
         console.error('Error loading daily updates:', error);
-        console.error('Error stack:', error.stack);
         updatesContainer.innerHTML = `
             <div class="error-message" style="background: #fee; padding: 1rem; border-radius: 8px; border: 2px solid #f00;">
                 <p style="color: #c00; font-weight: bold;">Unable to load daily updates. Please check if daily-updates.txt file exists.</p>
                 <p class="error-detail" style="color: #900; margin-top: 0.5rem;">Error: ${error.message}</p>
-                <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">Make sure daily-updates.txt is in the same directory as content.html</p>
             </div>
         `;
     }
