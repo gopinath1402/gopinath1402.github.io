@@ -1277,7 +1277,6 @@ body::after {
     text-align: center;
     margin-bottom: 3rem;
     padding-bottom: 2rem;
-    border-bottom: 2px solid var(--border-color);
 }
 
 .daily-market-header h2 {
